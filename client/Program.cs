@@ -9,11 +9,11 @@ namespace client
     class Program
     {
         const string target = "127.0.0.1:50051";
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Channel channel = new Channel(target, ChannelCredentials.Insecure);
 
-            channel.ConnectAsync().ContinueWith((task) =>
+            await channel.ConnectAsync().ContinueWith((task) =>
             {
                 if (task.Status == TaskStatus.RanToCompletion)
                 {
@@ -23,12 +23,32 @@ namespace client
 
             CallGreetingService(channel);
             CallCalculatorService(channel);
+            await CallGreetManyTimesRequest(channel);
 
             channel.ShutdownAsync().Wait();
             Console.ReadKey();
 
         }
 
+        private static async Task CallGreetManyTimesRequest(Channel channel)
+        {
+            var client = new GreetingService.GreetingServiceClient(channel);
+            var greeting = new Greeting
+            {
+                FirstName = "Olonyl",
+                LastName = "Landeros"
+            };
+
+            var request = new GreetManyTimesRequest { Greeting = greeting };
+            var response = client.GreetManyTimes(request);
+
+            while (await response.ResponseStream.MoveNext())
+            {
+                Console.WriteLine(response.ResponseStream.Current.Result);
+                await Task.Delay(200);
+            }
+
+        }
         private static void CallGreetingService(Channel channel)
         {
             // var client = new DummyService.DummyServiceClient(channel);
