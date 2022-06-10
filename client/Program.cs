@@ -2,6 +2,7 @@
 using Greet;
 using Grpc.Core;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace client
@@ -23,20 +24,44 @@ namespace client
 
             CallGreetingService(channel);
             CallCalculatorService(channel);
-            await CallGreetManyTimesRequest(channel);
+            await CallServerStreamRequest(channel);
+            await CallCientStreamRequest(channel);
 
             channel.ShutdownAsync().Wait();
             Console.ReadKey();
 
         }
 
-        private static async Task CallGreetManyTimesRequest(Channel channel)
+        private static async Task CallCientStreamRequest(Channel channel)
         {
             var client = new GreetingService.GreetingServiceClient(channel);
             var greeting = new Greeting
             {
-                FirstName = "Olonyl",
-                LastName = "Landeros"
+                FirstName = "Client",
+                LastName = "Stream"
+            };
+
+            var request = new LongGreetRequest { Greeting = greeting };
+            var stream = client.LongGreet();
+
+            foreach (int i in Enumerable.Range(1, 10))
+            {
+                await stream.RequestStream.WriteAsync(request);
+            }
+            await stream.RequestStream.CompleteAsync();
+
+            var response = await stream.ResponseAsync;
+
+            Console.WriteLine(response.Result);
+        }
+
+        private static async Task CallServerStreamRequest(Channel channel)
+        {
+            var client = new GreetingService.GreetingServiceClient(channel);
+            var greeting = new Greeting
+            {
+                FirstName = "Server",
+                LastName = "Stream"
             };
 
             var request = new GreetManyTimesRequest { Greeting = greeting };
