@@ -68,7 +68,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Protobuf Include="../*.proto" OutputDir="%(RelativePath)models/" />
+    <Protobuf Include="..\calculator.proto">
+      <OutputDir>models/</OutputDir>
+    </Protobuf>
+    <Protobuf Include="..\dummy.proto">
+      <OutputDir>models/</OutputDir>
+    </Protobuf>
+    <Protobuf Include="..\greeting.proto">
+      <OutputDir>models/</OutputDir>
+    </Protobuf>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CalculatorServiceImpl.cs" />

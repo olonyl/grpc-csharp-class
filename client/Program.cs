@@ -22,19 +22,51 @@ namespace client
                 }
             });
 
-            CallGreetingService(channel);
-            CallCalculatorService(channel);
-            await CallServerStreamRequest(channel);
-            await CallCientStreamRequest(channel);
+            var client = new GreetingService.GreetingServiceClient(channel);
+
+            //CallGreetingService(client);
+            //CallCalculatorService(channel);
+            //await CallServerStreamRequest(client);
+            //await CallCientStreamRequest(client);
+            await CallBidirectionalRequest(client);
 
             channel.ShutdownAsync().Wait();
             Console.ReadKey();
 
         }
 
-        private static async Task CallCientStreamRequest(Channel channel)
+        private static async Task CallBidirectionalRequest(GreetingService.GreetingServiceClient client)
         {
-            var client = new GreetingService.GreetingServiceClient(channel);
+            var stream = client.GreetEveryone();
+
+            var reponseRenderTask = Task.Run(async () =>
+            {
+                while (await stream.ResponseStream.MoveNext())
+                {
+                    Console.WriteLine("Received: " + stream.ResponseStream.Current.Result);
+                }
+            });
+
+            Greeting[] greetings =
+                 {
+                new Greeting {FirstName="John", LastName="Doe"},
+                new Greeting {FirstName="Clement", LastName="Jean"},
+                new Greeting {FirstName="Olonyl", LastName="Landeros"}
+            };
+
+            foreach (var greeting in greetings)
+            {
+                Console.WriteLine("Sending: " + greeting.ToString());
+                await stream.RequestStream.WriteAsync(new GreetEveryoneRequest { Greeting = greeting });
+            }
+
+            await stream.RequestStream.CompleteAsync();
+            await reponseRenderTask;
+
+        }
+
+        private static async Task CallCientStreamRequest(GreetingService.GreetingServiceClient client)
+        {
             var greeting = new Greeting
             {
                 FirstName = "Client",
@@ -55,9 +87,8 @@ namespace client
             Console.WriteLine(response.Result);
         }
 
-        private static async Task CallServerStreamRequest(Channel channel)
+        private static async Task CallServerStreamRequest(GreetingService.GreetingServiceClient client)
         {
-            var client = new GreetingService.GreetingServiceClient(channel);
             var greeting = new Greeting
             {
                 FirstName = "Server",
@@ -74,10 +105,8 @@ namespace client
             }
 
         }
-        private static void CallGreetingService(Channel channel)
+        private static void CallGreetingService(GreetingService.GreetingServiceClient client)
         {
-            // var client = new DummyService.DummyServiceClient(channel);
-            var client = new GreetingService.GreetingServiceClient(channel);
             var greeting = new Greeting
             {
                 FirstName = "Olonyl",
