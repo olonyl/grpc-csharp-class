@@ -1,6 +1,7 @@
 ﻿using Calculator;
 using Greet;
 using Grpc.Core;
+using Sqrt;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,8 +29,8 @@ namespace client
             //CallCalculatorService(channel);
             //await CallServerStreamRequest(client);
             //await CallCientStreamRequest(client);
-            await CallBidirectionalRequest(client);
-
+            //await CallBidirectionalRequest(client);
+            CallSqrtService(channel);
             channel.ShutdownAsync().Wait();
             Console.ReadKey();
 
@@ -134,6 +135,31 @@ namespace client
             var response = client.Sum(request);
 
             Console.WriteLine($"Sum for X: {values.X}, Y: {values.Y} is equal to {response.Result}");
+        }
+
+
+        private static void CallSqrtService(Channel channel)
+        {
+            var client = new SqrtService.SqrtServiceClient(channel);
+
+            Calculate(client, 16);
+            Calculate(client, -1);
+
+        }
+
+        private static void Calculate(SqrtService.SqrtServiceClient client, int number)
+        {
+            try
+            {
+                var response = client.Sqrt(new SqrtRequest { Number = number });
+
+                Console.WriteLine(response.SquareRoot);
+            }
+            catch (RpcException ex)
+            {
+                Console.WriteLine("Error: " + ex.Status.Detail);
+
+            }
         }
     }
 }
