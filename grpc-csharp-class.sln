@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proto", "proto", "{E601AC76-9490-449C-8967-F0C61CC5E03A}"
 	ProjectSection(SolutionItems) = preProject
 		calculator.proto = calculator.proto
+		deadline.proto = deadline.proto
 		dummy.proto = dummy.proto
 		greeting.proto = greeting.proto
 		sqrt.proto = sqrt.proto

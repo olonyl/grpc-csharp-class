@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package deadline;
+
+message WavingRequest{
+	string name = 1;
+}
+
+message WavingResponse {
+	string result = 1;
+}
+
+service WavingService{
+	rpc wage_with_deadline (WavingRequest) returns (WavingResponse) {}
+}

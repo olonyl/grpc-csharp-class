@@ -1,4 +1,5 @@
 ﻿using Calculator;
+using Deadline;
 using Greet;
 using Grpc.Core;
 using Sqrt;
@@ -30,7 +31,11 @@ namespace client
             //await CallServerStreamRequest(client);
             //await CallCientStreamRequest(client);
             //await CallBidirectionalRequest(client);
-            CallSqrtService(channel);
+            //CallSqrtService(channel);
+
+            CallWaveService(channel);
+
+
             channel.ShutdownAsync().Wait();
             Console.ReadKey();
 
@@ -137,6 +142,24 @@ namespace client
             Console.WriteLine($"Sum for X: {values.X}, Y: {values.Y} is equal to {response.Result}");
         }
 
+        private static void CallWaveService(Channel channel)
+        {
+            var client = new WavingService.WavingServiceClient(channel);
+
+            try
+            {
+                var response = client.wage_with_deadline(new WavingRequest { Name = "Olonyl" },
+                    deadline: DateTime.UtcNow.AddMilliseconds(100));
+
+                Console.WriteLine(response.Result);
+
+            }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.DeadlineExceeded)
+            {
+                Console.WriteLine($"Error: {ex.Status.Detail}");
+            }
+        }
+
 
         private static void CallSqrtService(Channel channel)
         {
@@ -161,5 +184,7 @@ namespace client
 
             }
         }
+
+
     }
 }
