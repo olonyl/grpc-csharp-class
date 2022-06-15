@@ -4,6 +4,7 @@ using Greet;
 using Grpc.Core;
 using Sqrt;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,7 +15,14 @@ namespace client
         const string target = "127.0.0.1:50051";
         static async Task Main(string[] args)
         {
-            Channel channel = new Channel(target, ChannelCredentials.Insecure);
+            var clientCert = File.ReadAllText("ssl/client.crt");
+            var clientKey = File.ReadAllText("ssl/client.key");
+            var caCrt = File.ReadAllText("ssl/ca.crt");
+
+            var channelCredentials = new SslCredentials(caCrt,
+                new KeyCertificatePair(clientCert, clientKey));
+
+            Channel channel = new Channel("localhost", 50051, channelCredentials);
 
             await channel.ConnectAsync().ContinueWith((task) =>
             {
@@ -26,14 +34,14 @@ namespace client
 
             var client = new GreetingService.GreetingServiceClient(channel);
 
-            //CallGreetingService(client);
+            CallGreetingService(client);
             //CallCalculatorService(channel);
             //await CallServerStreamRequest(client);
             //await CallCientStreamRequest(client);
             //await CallBidirectionalRequest(client);
             //CallSqrtService(channel);
 
-            CallWaveService(channel);
+            //CallWaveService(channel);
 
 
             channel.ShutdownAsync().Wait();
