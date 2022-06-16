@@ -1,4 +1,4 @@
-﻿using Greet;
+﻿using Blog;
 using Grpc.Core;
 using Grpc.Reflection;
 using Grpc.Reflection.V1Alpha;
@@ -16,12 +16,13 @@ namespace server
 
             try
             {
-                var reflectionServiceImpl = new ReflectionServiceImpl(GreetingService.Descriptor, ServerReflection.Descriptor);
+                var reflectionServiceImpl = new ReflectionServiceImpl(BlogService.Descriptor, ServerReflection.Descriptor);
                 server = new Server
                 {
                     Services = {
-                        GreetingService.BindService(new GreetingServiceImpl()) ,
-                        ServerReflection.BindService(reflectionServiceImpl)
+                        BlogService.BindService(new BlogServiceImpl()),
+                      //  GreetingService.BindService(new GreetingServiceImpl()) ,
+                       ServerReflection.BindService(reflectionServiceImpl)
                         //CalculatorService.BindService(new CalculatorServiceImpl()),
                         //SqrtService.BindService(new SqrtServiceImpl()),
                         //WavingService.BindService(new WavingServiceImpl())
